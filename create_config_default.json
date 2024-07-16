@@ -1,0 +1,8 @@
+{
+    "projectName": "myConsole",
+    "entryFile": "src\\main.cpp",
+    "type": "console",
+    "vcpkgDir": "d:\\tools\\vcpkg",
+    "targetDir": "d:\\projects\\cpp",
+    "openDir": true
+}
