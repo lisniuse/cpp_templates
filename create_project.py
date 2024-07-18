@@ -65,17 +65,18 @@ class ProjectCreator:
         重命名目标文件夹中的文件，将文件名中的 'VcPkgTemplate' 替换为 project_name，
         对于 .cpp 文件使用 entry_file 的文件名
         """
+        blacklist = [ "dll", "mfc" ]
         entry_file_name = os.path.splitext(os.path.basename(self.entry_file))[0]
         for root, _, files in os.walk(self.project_path):
             for file in files:
                 old_path = os.path.join(root, file)
                 new_file_name = file.replace("VcPkgTemplate", self.project_name)
-                if file.endswith('.cpp') and self.project_type != "dll":
+                if file.endswith('.cpp') and self.project_type not in blacklist:
                     new_file_name = entry_file_name + '.cpp'
                 new_path = os.path.join(root, new_file_name)
                 os.rename(old_path, new_path)
 
-    def _replace_in_file(self, file_path, replacements):
+    def _replace_in_file(self, file_path, replacements, encoding = 'utf-8'):
         """
         在文件中替换指定的占位符
 
@@ -85,11 +86,11 @@ class ProjectCreator:
         if not os.path.exists(file_path):
             print(f"文件 '{file_path}' 未找到")
             return
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(file_path, 'r', encoding=encoding) as file:
             content = file.read()
         for old, new in replacements.items():
             content = content.replace(old, new)
-        with open(file_path, 'w', encoding='utf-8') as file:
+        with open(file_path, 'w', encoding=encoding) as file:
             file.write(content)
 
     def update_vcxproj_file(self):
@@ -124,6 +125,28 @@ class ProjectCreator:
         }
         self._replace_in_file(filters_file, replacements)
 
+    def get_all_file_paths(self, directory):
+        file_paths = []
+        blacklist = [ '.ico', '.aps' ]
+        for root, directories, files in os.walk(directory):
+            for filename in files:
+                if not any(filename.endswith(ext) for ext in blacklist):
+                    filepath = os.path.join(root, filename)
+                    file_paths.append(filepath)
+        return file_paths
+    
+    def update_project_name(self):
+        all_files = self.get_all_file_paths(self.project_path)
+        blacklist = [ ".rc", ".rc2" ]
+        for file in all_files:
+            replacements = {
+                "{projectName}": self.project_name
+            }
+            encoding = "utf-16"
+            if not any(file.endswith(ext) for ext in blacklist):
+                encoding = "utf-8"
+            self._replace_in_file(file, replacements, encoding=encoding)
+
     def open_project_directory(self):
         """
         打开项目目录
@@ -141,7 +164,10 @@ class ProjectCreator:
             return
         if not self.copy_template():
             return
+        
         self.rename_files()
+        if self.project_type == "mfc":
+            self.update_project_name()
         self.update_vcxproj_file()
         self.update_sln_file()
         self.update_filters_file()
