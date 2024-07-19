@@ -65,6 +65,7 @@ BEGIN_MESSAGE_MAP(C{projectName}Dlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDCANCEL, &CPVZCheaterDlg::OnBnClickedCancel)
 END_MESSAGE_MAP()
 
 
@@ -152,4 +153,12 @@ HCURSOR C{projectName}Dlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
+
+void CPVZCheaterDlg::OnBnClickedCancel()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	LOG("debug");
+	CDialogEx::OnCancel();
+}
+
 

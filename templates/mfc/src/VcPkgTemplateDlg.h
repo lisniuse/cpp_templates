@@ -4,6 +4,10 @@
 
 #pragma once
 
+#define LOG(fmt, ...) \
+CString str; \
+str.Format(CString(fmt), __VA_ARGS__); \
+AfxMessageBox(str);
 
 // C{projectName}Dlg 对话框
 class C{projectName}Dlg : public CDialogEx
@@ -31,4 +35,6 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnBnClickedCancel();
 };
